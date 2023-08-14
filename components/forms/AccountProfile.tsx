@@ -1,5 +1,5 @@
 "use client";
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useState } from "react";
 import z from "zod";
 import {
   Form,
@@ -10,12 +10,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useUploadThing } from "@/lib/uploadThing";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserValidation } from "@/lib/validations/user";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Image from "next/image";
+import { Textarea } from "../ui/textarea";
+import { isBase64Image } from "@/lib/utils";
+import { updateUser } from "@/lib/actions/user.action";
+import { usePathname, useRouter } from "next/navigation";
 // import
 interface Props {
   btnTitle: string;
@@ -29,30 +34,68 @@ interface Props {
   };
 }
 
-export default function AccountProfile({}: Props) {
+export default function AccountProfile({ user, btnTitle }: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [files, setFiles] = useState<File[]>([]);
+  const { startUpload } = useUploadThing("media");
   const form = useForm({
     resolver: zodResolver(UserValidation),
     defaultValues: {
-      profile_photo: "",
-      name: "",
-      userName: "",
-      bio: "",
+      profile_photo: user?.image || "",
+      name: user?.name || "",
+      userName: user?.userName || "",
+      bio: user?.bio || "",
     },
   });
 
   //   handle file upload
   const handleImage = (
-    e: ChangeEvent,
+    e: ChangeEvent<HTMLInputElement>,
     fieldChange: (value: string) => void
   ) => {
     e.preventDefault();
+    const fileReader = new FileReader();
+    if (e.target.files && e.target.files.length) {
+      const file = e.target.files[0];
+      setFiles(Array.from(e.target.files));
+      if (!file.type.includes("image")) return;
+      fileReader.onload = async (e) => {
+        const imageDataUrl = e.target?.result?.toString() || "";
+        fieldChange(imageDataUrl);
+      };
+      fileReader.readAsDataURL(file);
+    }
   };
 
-  function onSubmit(values: z.infer<typeof UserValidation>) {
+  const onSubmit = async (values: z.infer<typeof UserValidation>) => {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values);
-  }
+    const blob = values.profile_photo;
+    const hasImageChanged = isBase64Image(blob);
+    if (hasImageChanged) {
+      const imgRes = await startUpload(files);
+
+      if (imgRes && imgRes[0].fileUrl) {
+        values.profile_photo = imgRes[0].fileUrl;
+      }
+    }
+    await updateUser({
+      userName: values.userName,
+      name: values.name,
+      bio: values.bio,
+      image: values.profile_photo,
+      userId: user.id,
+      path: pathname,
+    });
+
+    if (pathname === "/profile/edit") {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
   return (
     <Form {...form}>
       <form
@@ -83,7 +126,6 @@ export default function AccountProfile({}: Props) {
                     className="object-contain"
                   />
                 )}
-                Username
               </FormLabel>
               <FormControl className="flex-1 text-base-semibold text-gray-200">
                 <Input
@@ -98,7 +140,69 @@ export default function AccountProfile({}: Props) {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-3 w-full">
+              <FormLabel className="text-base-semi-bold text-light-2">
+                Name
+              </FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Name"
+                  className="account-form_input no-focus"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="userName"
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-3 w-full">
+              <FormLabel className="text-base-semi-bold text-light-2">
+                Username
+              </FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Username"
+                  className="account-form_input no-focus"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="bio"
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-3 w-full">
+              <FormLabel className="text-base-semi-bold text-light-2">
+                Bio
+              </FormLabel>
+              <FormControl>
+                <Textarea
+                  rows={10}
+                  placeholder="Bio"
+                  className="account-form_input no-focus"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="bg-primary-500">
+          Submit
+        </Button>
       </form>
     </Form>
   );

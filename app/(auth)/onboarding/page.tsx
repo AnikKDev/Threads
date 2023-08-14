@@ -9,7 +9,7 @@ export default async function OnBoarding({}: Props) {
   const userData = {
     id: user?.id,
     objectId: userInfo?._id,
-    userName: userInfo?.name || user?.name,
+    userName: userInfo?.userName || user?.username,
     name: userInfo?.name || user?.firstName || "",
     bio: userInfo?.bio || "",
     image: userInfo?.image || user?.imageUrl,

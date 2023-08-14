@@ -1,8 +1,8 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import { Inter } from "next/font/google";
-import "../globals.css";
 import Topbar from "@/components/shared/Topbar";
 import Leftsidebar from "@/components/shared/Leftsidebar";
+import "../globals.css";
 import Rightsidebar from "@/components/shared/Rightsidebar";
 import Bottombar from "@/components/shared/Bottombar";
 // for seo purpose
