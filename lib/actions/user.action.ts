@@ -43,3 +43,16 @@ export async function updateUser({
     throw new Error("Unable to update user");
   }
 }
+
+export async function fetchUser(userId: string) {
+  try {
+    connectedToDB();
+    return await User.findOne({ id: userId });
+    // .populate({
+    //   path:"communities",
+    //   model: "community"
+    // })
+  } catch (error) {
+    throw new Error("Unable to fetch user");
+  }
+}
