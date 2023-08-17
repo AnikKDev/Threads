@@ -107,3 +107,30 @@ export const fetchThreadById = async (id: string) => {
     throw new Error("Error fetchihng the thread");
   }
 };
+
+export async function addCommentToThread(
+  threadId: string,
+  commentText: string,
+  userId: string,
+  path: string
+) {
+  connectedToDB();
+  try {
+    // !the basic thing here is that, after commenting something on the thread, we are storing that comment as a new thread in the Tread model. the after saving that comment as a thread in the Tread model, we are taking that saved threads _id and pushing it to the children property of the thread whom it belongs to. the OG thread
+    const originalThread = await Thread.findById(threadId);
+    if (!originalThread) {
+      throw new Error("Thread not found");
+    }
+    const commentThread = new Thread({
+      text: commentText,
+      author: userId,
+      parentId: threadId,
+    });
+    const savedCommentThread = await commentThread.save();
+    originalThread.children.push(savedCommentThread._id);
+    await originalThread.save();
+    revalidatePath(path);
+  } catch (error) {
+    throw new Error("Error commenting to thread");
+  }
+}
