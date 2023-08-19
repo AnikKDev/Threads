@@ -63,7 +63,7 @@ export default function ThreadCard({
               </h4>
             </Link>
             <p className="mt-2 text-small-regular text-light-2">{content}</p>
-            <div className="mt-p flex flex-col gap-3">
+            <div className={`mt-p flex flex-col gap-3 ${isComment && "mb-10"}`}>
               <div className="flex gap-3.5">
                 <Image
                   src="/heart-gray.svg"

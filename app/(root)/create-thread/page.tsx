@@ -9,15 +9,15 @@ export default async function CreateThread({}: Props) {
   const user = await currentUser();
   if (!user) return null;
   const userInfo = await fetchUser(user.id);
-  console.log(userInfo);
+  // console.log(userInfo);
   // TODO: Have to fix this redirecting
-  // if (!userInfo?.onboarded) redirect("/onboarding");
+  if (!userInfo?.onBoarded) redirect("/onboarding");
 
   return (
     <>
       <h1 className="head-text">Create Thread</h1>
 
-      <PostThread userId={userInfo._id} />
+      <PostThread userId={userInfo?._id} />
     </>
   );
 }

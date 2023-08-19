@@ -18,16 +18,16 @@ export default async function Profile({ params }: Props) {
   const user = await currentUser();
   if (!user) return null;
   const userInfo = await fetchUser(params.id);
-  //   if (!userInfo?.onboarded) redirect("/onboarding");
+  if (!userInfo?.onBoarded) redirect("/onboarding");
   return (
     <section>
       <ProfileHeader
-        accountId={userInfo.id}
+        accountId={userInfo?.id}
         authUserId={user.id}
-        username={userInfo.userName}
-        name={userInfo.name}
-        imgUrl={userInfo.image}
-        bio={userInfo.bio}
+        username={userInfo?.userName}
+        name={userInfo?.name}
+        imgUrl={userInfo?.image}
+        bio={userInfo?.bio}
       />
 
       <div className="mt-9">
@@ -61,7 +61,7 @@ export default async function Profile({ params }: Props) {
             >
               <ThreadsTab
                 currentUserId={user.id}
-                accountId={userInfo.id}
+                accountId={userInfo?.id}
                 accountType="User"
               />
             </TabsContent>

@@ -18,9 +18,9 @@ export default async function ThreadDetail({ params }: Params) {
   const user = await currentUser();
   if (!user) return null;
   const userInfo = await fetchUser(user.id);
+  if (!userInfo?.onBoarded) redirect("/onboarding");
 
-  if (userInfo?.onboarded) redirect("/onboarding");
-
+  console.log("param id", userInfo?.onBoarded);
   const thread = await fetchThreadById(params.id);
   return (
     <section className="relative">
