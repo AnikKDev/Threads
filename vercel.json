@@ -2,11 +2,11 @@
   "functions": {
     "app/api/webhook/clerk/route.ts": {
       "memory": 3008,
-      "maxDuration": 60
+      "maxDuration": 10
     },
     "app/api/uploadthing/route.ts": {
       "memory": 1024,
-      "maxDuration": 30
+      "maxDuration": 10
     }
   }
 }
